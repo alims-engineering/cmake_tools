@@ -33,7 +33,10 @@ git clone https://github.com/alims-engineering/cmake_tools.git  "/Alims/engineer
 Then add the following line to your CMakeLists.txt:
 
 ```cmake
-add_subdirectory("/Alims/engineering/cmake_tools")
+add_subdirectory(
+    "/Alims/engineering/cmake_tools"
+    ${CMAKE_BINARY_DIR}/cmake_tools
+)
 ```
 
 #### Windows
@@ -46,5 +49,8 @@ git clone https://github.com/alims-engineering/cmake_tools.git "C:/Alims/enginee
 Then add the following line to your CMakeLists.txt:
 
 ```cmake
-add_subdirectory("C:/Alims/engineering/cmake_tools")
+add_subdirectory(
+    "C:/Alims/engineering/cmake_tools"
+    ${CMAKE_BINARY_DIR}/cmake_tools
+)
 ```
