@@ -27,24 +27,24 @@ FetchContent_MakeAvailable(cmake_tools)
 Clone the repository:
 
 ```bash
-git clone https://github.com/alims-engineering/cmake_tools.git "/AAA_Alims_Core/cmake_tools"
+git clone https://github.com/alims-engineering/cmake_tools.git  "/Alims/engineering/cmake_tools"
 ```
 
 Then add the following line to your CMakeLists.txt:
 
 ```cmake
-add_subdirectory("/AAA_Alims_Core/cmake_tools")
+add_subdirectory("/Alims/engineering/cmake_tools")
 ```
 
 #### Windows
 Clone the repository:
 
 ```bash
-git clone https://github.com/alims-engineering/cmake_tools.git "C:/AAA_Alims_Core/cmake_tools"
+git clone https://github.com/alims-engineering/cmake_tools.git "C:/Alims/engineering/cmake_tools"
 ```
 
 Then add the following line to your CMakeLists.txt:
 
 ```cmake
-add_subdirectory("C:/AAA_Alims_Core/cmake_tools")
+add_subdirectory("C:/Alims/engineering/cmake_tools")
 ```
