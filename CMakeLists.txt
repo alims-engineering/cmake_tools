@@ -1,44 +1,70 @@
-﻿# cmake_tools::CMakeLists
-cmake_minimum_required(VERSION 3.21)
- 
-# cmake tools 本身不生成任何目标
+﻿cmake_minimum_required(VERSION 3.21)
 project(cmake_tools NONE)
 
 
-set(CMAKE_TOOLS_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")           # cmake_tools 根目录
-set(CMAKE_TOOLS_CMAKE_DIR "${CMAKE_TOOLS_ROOT_DIR}/cmake")      # cmake_tools cmake/ 模块目录，等价于其他项目的 src/
+# ====================================
+#   Param
+# ====================================
+
+option(
+    CMAKE_TOOLS_QUIET
+    "Suppress cmake_tools module loading messages"
+    OFF
+)
 
 
-# 递归查找所有 .cmake 文件
+# ====================================
+#   variable
+# ====================================
+
+set(CMAKE_TOOLS_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(CMAKE_TOOLS_CMAKE_DIR "${CMAKE_TOOLS_ROOT_DIR}/cmake")
+
+
+# ====================================
+#   Logic - Module Discovery & Loading
+# ====================================
+
+# Recursively discover all .cmake files
 file(GLOB_RECURSE CMAKE_TOOLS_SRC
     "${CMAKE_TOOLS_CMAKE_DIR}/*.cmake"
 )
 
-# 排除特定目录和文件
+# Exclude specific directories and files from loading
 set(EXCLUDE_PATTERNS
 #    ".*/test/.*"
     ".*/tests/.*"
     ".*/deprecated/.*"
     ".*/internal/.*"
     ".*/example/.*"
-    ".*/cmake_tools\\.cmake$"      # 避免重复加载主配置文件
+    ".*/cmake_tools\\.cmake$"
     ".*/cmake_tools_init\\.cmake$"
     ".*/cmake_tools_version\\.cmake$"
 )
 
+# Apply exclusion rules
 foreach(pattern ${EXCLUDE_PATTERNS})
     list(FILTER CMAKE_TOOLS_SRC EXCLUDE REGEX ${pattern})
 endforeach()
 
-# 按路径排序，确保依赖顺序
+# Sort modules by path to ensure a deterministic loading order
 list(SORT CMAKE_TOOLS_SRC)
 
 
+# Load each discovered module
 foreach(src ${CMAKE_TOOLS_SRC})
     include(${src})
-    message(STATUS "[cmake_tools] Loaded: ${src}")
+
+    if(NOT CMAKE_TOOLS_QUIET)
+        message(STATUS "[cmake_tools] Loaded: ${src}")
+    endif()
 endforeach()
 
-message(STATUS "[cmake_tools] Total modules loaded: ${CMAKE_TOOLS_SRC_LENGTH}")
+# Report the total number of loaded modules
+list(LENGTH CMAKE_TOOLS_SRC CMAKE_TOOLS_SRC_LENGTH)
 
-# ===============================================================
+if(NOT CMAKE_TOOLS_QUIET)
+    message(STATUS
+        "[cmake_tools] Total modules loaded: ${CMAKE_TOOLS_SRC_LENGTH}"
+    )
+endif()
