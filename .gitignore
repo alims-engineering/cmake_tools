@@ -19,3 +19,8 @@ vcpkg_installed/
 # ===== OS =====
 Thumbs.db
 .DS_Store
+
+# ====================================
+#	needed files / folders
+# ====================================
+!cmake/**
