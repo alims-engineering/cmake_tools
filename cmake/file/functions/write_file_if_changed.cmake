@@ -1,4 +1,4 @@
-# ====== write_if_changed.cmake
+# ====== write_file_if_changed.cmake
 # ====================================
 #       explanation
 # ====================================
@@ -26,75 +26,75 @@
 # None.
 
 
-function(write_if_changed filepath content)
+function(write_file_if_changed filepath content)
 
-    # ====================================
-    #       pre-variables
-    # ====================================
-    set(this_function_name "WRITE_IF_CHANGED")
-
-
-    # ====================================
-    #       includes
-    # ====================================
-    # None.
+	# ====================================
+	#		pre-variables
+	# ====================================
+	set(this_function_name "WRITE_FILE_IF_CHANGED")
 
 
-    # ====================================
-    #       function start prompt
-    # ====================================
-    if(NOT IS_SILENT_MODE)
-        message(STATUS "")
-        message(STATUS "[${this_function_name} - start]")
-    endif()
+	# ====================================
+	#		includes
+	# ====================================
+	# None.
 
 
-    # ====================================
-    #       parameters
-    # ====================================
-    # filepath and content are declared directly
-    # in the function signature.
-    #
-    # IS_SILENT_MODE is read from the caller scope.
+	# ====================================
+	#       function start prompt
+	# ====================================
+	if(NOT IS_SILENT_MODE)
+		message(STATUS "")
+		message(STATUS "[${this_function_name} - start]")
+	endif()
 
 
-    # ====================================
-    #       parameter default value
-    # ====================================
-    if(NOT DEFINED IS_SILENT_MODE)
-        set(IS_SILENT_MODE FALSE)
-    endif()
+	# ====================================
+	#		parameters
+	# ====================================
+	# filepath and content are declared directly
+	# in the function signature.
+	#
+	# IS_SILENT_MODE is read from the caller scope.
 
 
-    # ====================================
-    #       logic
-    # ====================================
-    if(EXISTS "${filepath}")
-
-        file(READ "${filepath}" old_content)
-
-        if(old_content STREQUAL content)
-            return()
-        endif()
-
-    endif()
-
-    file(WRITE "${filepath}" "${content}")
-
-    if(NOT IS_SILENT_MODE)
-        message(STATUS "[AutoGen] Re-Wrote: ${filepath}")
-    endif()
+	# ====================================
+	#		parameter default value
+	# ====================================
+	if(NOT DEFINED IS_SILENT_MODE)
+		set(IS_SILENT_MODE FALSE)
+	endif()
 
 
-    # ====================================
-    #       print return variables
-    # ====================================
-    # None.
+	# ====================================
+	#		logic
+	# ====================================
+	if(EXISTS "${filepath}")
+
+		file(READ "${filepath}" old_content)
+
+		if(old_content STREQUAL content)
+			return()
+		endif()
+
+	endif()
+
+	file(WRITE "${filepath}" "${content}")
+
+	if(NOT IS_SILENT_MODE)
+		message(STATUS "[cmake_tools] Re-Wrote: ${filepath}")
+	endif()
 
 
-    # ====================================
-    #       return variables
-    # ====================================
-    # None.
+	# ====================================
+	#       print return variables
+	# ====================================
+	# None.
+
+
+	# ====================================
+	#       return variables
+	# ====================================
+	# None.
 
 endfunction()

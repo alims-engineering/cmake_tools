@@ -44,11 +44,22 @@
 | **Postcondition** | - `cpp_tools` is available<br>- `FETCH_CONTENT_CPP_TOOLS_*` variables are exported.          |
 | **Returns**       | Repository URL, Git tag, source directory, and binary directory.                             |
 
-## write_if_changed
+## generate_recursive_directory_aggregate_headers
 
 | Field             | Description |
 | :---------------- | :---------- |
-| **Header**        | `write_if_changed(<filepath> <content> [IS_SILENT_MODE])` |
+| **Header**        | `generate_recursive_directory_aggregate_headers([ROOT_DIR <path>] [IS_SILENT_MODE])` |
+| **Parameters**    | `ROOT_DIR` — Root directory to recursively process.<br>`IS_SILENT_MODE` — Disables output messages. |
+| **Description**   | Recursively generates aggregate headers for directories containing header files or generated child aggregate headers. Each aggregate header is generated in the parent directory of its corresponding directory and includes only direct header files and direct child aggregate headers. |
+| **Precondition**  | - `ROOT_DIR` is specified.<br>- `ROOT_DIR` resolves to a valid directory.<br>- The parent directory of each generated aggregate header exists.<br>- Header files use supported extensions. |
+| **Postcondition** | - Aggregate headers are generated recursively from leaf directories upward.<br>- Empty directories do not generate aggregate headers.<br>- Each aggregate header includes only direct headers and direct child aggregate headers.<br>- Duplicate include entries are removed.<br>- `GENERATE_RECURSIVE_DIRECTORY_AGGREGATE_HEADERS_ROOT_DIR` is exported.<br>- `GENERATE_RECURSIVE_DIRECTORY_AGGREGATE_HEADERS_GENERATED_HEADER_LIST` is exported. |
+| **Returns**       | Root directory and list of generated aggregate headers through `GENERATE_RECURSIVE_DIRECTORY_AGGREGATE_HEADERS_ROOT_DIR` and `GENERATE_RECURSIVE_DIRECTORY_AGGREGATE_HEADERS_GENERATED_HEADER_LIST`. |
+
+## write_file_if_changed
+
+| Field             | Description |
+| :---------------- | :---------- |
+| **Header**        | `write_file_if_changed(<filepath> <content> [IS_SILENT_MODE])` |
 | **Parameters**    | `filepath` — Path of the file to write.<br>`content` — Content to write to the file.<br>`IS_SILENT_MODE` — Disables output messages. |
 | **Description**   | Writes the specified content to a file only when the file does not exist or its existing content differs from the specified content. |
 | **Precondition**  | - `filepath` specifies a valid file path.<br>- The parent directory of `filepath` exists.<br>- `content` contains the content to be written. |

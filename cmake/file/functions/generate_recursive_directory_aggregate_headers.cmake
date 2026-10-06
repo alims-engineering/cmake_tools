@@ -82,6 +82,7 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#		includes
 	# ====================================
+	include(write_file_if_changed)
 
 
 	# ====================================
@@ -150,27 +151,63 @@ function(generate_recursive_directory_aggregate_headers)
 		set(child_directories)
 
 		foreach(child_path IN LISTS child_paths)
+
 			if(IS_DIRECTORY "${child_path}")
 				list(APPEND child_directories "${child_path}")
 			endif()
+
 		endforeach()
 
 
 		# ====================================
 		#       recursively process children
 		# ====================================
+		set(generated_child_directories)
+
 		foreach(child_directory IN LISTS child_directories)
+
 			_generate_directory_aggregate_header("${child_directory}")
+
+			get_filename_component(
+				child_directory_name
+				"${child_directory}"
+				NAME
+			)
+
+			set(child_aggregate_header
+				"${current_directory}/${child_directory_name}.hpp"
+			)
+
+			if(EXISTS "${child_aggregate_header}")
+				list(
+					APPEND
+					generated_child_directories
+					"${child_directory}"
+				)
+			endif()
+
 		endforeach()
 
 
 		# ====================================
 		#       directory information
 		# ====================================
-		get_filename_component(directory_name "${current_directory}" NAME)
-		get_filename_component(parent_directory "${current_directory}" DIRECTORY)
+		get_filename_component(
+			directory_name
+			"${current_directory}"
+			NAME
+		)
 
-		set(aggregate_header "${parent_directory}/${directory_name}.hpp")
+		get_filename_component(
+			parent_directory
+			"${current_directory}"
+			DIRECTORY
+		)
+
+		set(
+			aggregate_header
+			"${parent_directory}/${directory_name}.hpp"
+		)
 
 
 		# ====================================
@@ -188,7 +225,39 @@ function(generate_recursive_directory_aggregate_headers)
 		# ====================================
 		#       remove generated aggregate
 		# ====================================
-		list(REMOVE_ITEM direct_header_files "${aggregate_header}")
+		list(
+			REMOVE_ITEM
+			direct_header_files
+			"${aggregate_header}"
+		)
+
+
+		# ====================================
+		#       remove child aggregate headers
+		# ====================================
+		foreach(child_directory IN LISTS child_directories)
+
+			get_filename_component(
+				child_directory_name
+				"${child_directory}"
+				NAME
+			)
+
+			list(
+				REMOVE_ITEM
+				direct_header_files
+				"${current_directory}/${child_directory_name}.hpp"
+			)
+
+		endforeach()
+
+
+		# ====================================
+		#       check whether generation is required
+		# ====================================
+		if(NOT direct_header_files AND NOT generated_child_directories)
+			return()
+		endif()
 
 
 		# ====================================
@@ -202,7 +271,11 @@ function(generate_recursive_directory_aggregate_headers)
 		# ------------------------------------
 		foreach(header_file IN LISTS direct_header_files)
 
-			get_filename_component(header_name "${header_file}" NAME)
+			get_filename_component(
+				header_name
+				"${header_file}"
+				NAME
+			)
 
 			list(
 				APPEND
@@ -216,9 +289,13 @@ function(generate_recursive_directory_aggregate_headers)
 		# ------------------------------------
 		#       child aggregate headers
 		# ------------------------------------
-		foreach(child_directory IN LISTS child_directories)
+		foreach(child_directory IN LISTS generated_child_directories)
 
-			get_filename_component(child_directory_name "${child_directory}" NAME)
+			get_filename_component(
+				child_directory_name
+				"${child_directory}"
+				NAME
+			)
 
 			list(
 				APPEND
@@ -239,18 +316,40 @@ function(generate_recursive_directory_aggregate_headers)
 		# ====================================
 		#       generate aggregate header
 		# ====================================
-		file(WRITE "${aggregate_header}" "#pragma once\n\n")
+		set(aggregate_header_content "#pragma once\n\n")
 
 		foreach(include_line IN LISTS include_lines)
-			file(APPEND "${aggregate_header}" "${include_line}\n")
+
+			string(
+				APPEND
+				aggregate_header_content
+				"${include_line}\n"
+			)
+
 		endforeach()
+
+		set(IS_SILENT_MODE "${ARG_IS_SILENT_MODE}")
+
+		write_file_if_changed(
+			"${aggregate_header}"
+			"${aggregate_header_content}"
+		)
 
 
 		# ====================================
 		#       record generated header
 		# ====================================
-		list(APPEND generated_header_list "${aggregate_header}")
-		set(generated_header_list "${generated_header_list}" PARENT_SCOPE)
+		list(
+			APPEND
+			generated_header_list
+			"${aggregate_header}"
+		)
+
+		set(
+			generated_header_list
+			"${generated_header_list}"
+			PARENT_SCOPE
+		)
 
 
 		# ====================================
@@ -266,7 +365,12 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#       execute
 	# ====================================
-	file(GLOB root_child_paths LIST_DIRECTORIES TRUE "${root_dir}/*")
+	file(
+		GLOB
+		root_child_paths
+		LIST_DIRECTORIES TRUE
+		"${root_dir}/*"
+	)
 
 	foreach(root_child_path IN LISTS root_child_paths)
 
@@ -285,14 +389,24 @@ function(generate_recursive_directory_aggregate_headers)
 		message(STATUS "")
 		message(STATUS "[${return_var_prefix} - print return variables]")
 
-		set(${return_var_prefix}_ROOT_DIR "${root_dir}")
-		set(${return_var_prefix}_GENERATED_HEADER_LIST "${generated_header_list}")
+		set(
+			${return_var_prefix}_ROOT_DIR
+			"${root_dir}"
+		)
+
+		set(
+			${return_var_prefix}_GENERATED_HEADER_LIST
+			"${generated_header_list}"
+		)
 
 		foreach(temp_print_return_var IN ITEMS
 			"${return_var_prefix}_ROOT_DIR"
 			"${return_var_prefix}_GENERATED_HEADER_LIST"
 		)
-			message(STATUS "${temp_print_return_var} = ${${temp_print_return_var}}")
+			message(
+				STATUS
+				"${temp_print_return_var} = ${${temp_print_return_var}}"
+			)
 		endforeach()
 
 	endif()
@@ -301,8 +415,16 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#       return variables
 	# ====================================
-	set(${return_var_prefix}_ROOT_DIR "${root_dir}" PARENT_SCOPE)
-	set(${return_var_prefix}_GENERATED_HEADER_LIST "${generated_header_list}" PARENT_SCOPE)
+	set(
+		${return_var_prefix}_ROOT_DIR
+		"${root_dir}"
+		PARENT_SCOPE
+	)
 
+	set(
+		${return_var_prefix}_GENERATED_HEADER_LIST
+		"${generated_header_list}"
+		PARENT_SCOPE
+	)
 
 endfunction()
