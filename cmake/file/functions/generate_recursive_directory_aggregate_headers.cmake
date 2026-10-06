@@ -285,7 +285,7 @@ function(generate_recursive_directory_aggregate_headers)
 		message(STATUS "")
 		message(STATUS "[${return_var_prefix} - print return variables]")
 
-		set(${return_var_prefix}_ROOT_DIR "${root_dir")
+		set(${return_var_prefix}_ROOT_DIR "${root_dir}")
 		set(${return_var_prefix}_GENERATED_HEADER_LIST "${generated_header_list}")
 
 		foreach(temp_print_return_var IN ITEMS
