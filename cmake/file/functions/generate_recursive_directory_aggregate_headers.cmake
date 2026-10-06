@@ -104,10 +104,14 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	set(options
 		IS_SILENT_MODE
+	)
+
+	set(oneValueArgs
+		ROOT_DIR
 		GENERATE_FILE_NAME_COMMENT
 		GENERATE_AUTO_GENERATE_COMMENT
 	)
-	set(oneValueArgs ROOT_DIR)
+
 	set(multiValueArgs)
 
 	cmake_parse_arguments(
@@ -152,7 +156,7 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#       pre-variables
 	# ====================================
-	include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/write_file_if_changed.cmake")
+	set(generated_header_list)
 
 
 	# ====================================
