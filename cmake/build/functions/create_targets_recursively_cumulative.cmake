@@ -24,7 +24,7 @@
 # ====================================
 #       parameter default value
 # ====================================
-# SEARCH_PATHS      = ${CMAKE_SOURCE_DIR}
+# SEARCH_PATHS      = ${CMAKE_CURRENT_SOURCE_DIR}
 # FILE_PATTERNS     = *.c, *.cpp
 # IS_SILENT_MODE    = FALSE
 
@@ -63,7 +63,7 @@ function(create_targets_recursively_cumulative)
     #       parameter default value
     # ====================================
     if(NOT DEFINED ARG_SEARCH_PATHS)
-        set(ARG_SEARCH_PATHS "${CMAKE_SOURCE_DIR}")
+        set(ARG_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
 
     if(NOT DEFINED ARG_FILE_PATTERNS)
