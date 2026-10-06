@@ -29,7 +29,11 @@ A .cmake files should record the info below as the comment at top:
 ```
 
 ## Inside function
-Structure within a function:
+formatting within function:
+- function naming with snake_case
+- Short and simple statements should remain on a single line.
+
+Structure within function:
 ```
 function()
 	# ====================================

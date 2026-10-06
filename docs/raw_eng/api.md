@@ -43,3 +43,14 @@
 | **Precondition**  | - `FetchContent` is available<br>- `GIT_TAG` is valid if specified.                          |
 | **Postcondition** | - `cpp_tools` is available<br>- `FETCH_CONTENT_CPP_TOOLS_*` variables are exported.          |
 | **Returns**       | Repository URL, Git tag, source directory, and binary directory.                             |
+
+## write_if_changed
+
+| Field             | Description |
+| :---------------- | :---------- |
+| **Header**        | `write_if_changed(<filepath> <content> [IS_SILENT_MODE])` |
+| **Parameters**    | `filepath` — Path of the file to write.<br>`content` — Content to write to the file.<br>`IS_SILENT_MODE` — Disables output messages. |
+| **Description**   | Writes the specified content to a file only when the file does not exist or its existing content differs from the specified content. |
+| **Precondition**  | - `filepath` specifies a valid file path.<br>- The parent directory of `filepath` exists.<br>- `content` contains the content to be written. |
+| **Postcondition** | - The file is created if it does not exist.<br>- The file is rewritten if its existing content differs from `content`.<br>- The file is not rewritten when its existing content is identical to `content`. |
+| **Returns**       | None. |

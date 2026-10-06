@@ -4,7 +4,7 @@
 # ====================================
 # Recursively create targets based on the directory hierarchy.
 #
-# Each target contains source files from its own directory
+# Each target contains files from its own directory
 # and all descendant directories.
 #
 # Naming of targets:
@@ -149,7 +149,7 @@ function(create_targets_recursively_cumulative)
             foreach(directory ${directories})
 
                 # ------------------------------------
-                #       collect cumulative sources
+                #       collect cumulative files
                 # ------------------------------------
                 set(sources)
 
@@ -231,6 +231,15 @@ function(create_targets_recursively_cumulative)
                     "${current_target_name}"
                     OBJECT
                     ${sources}
+                )
+    
+
+                set_property(
+                    TARGET
+                    "${current_target_name}"
+                    PROPERTY
+                    LINKER_LANGUAGE
+                    CXX
                 )
 
 
