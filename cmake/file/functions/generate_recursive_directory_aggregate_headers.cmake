@@ -55,12 +55,17 @@
 # ====================================
 # ROOT_DIR       : Root directory to recursively process.
 # IS_SILENT_MODE : Disable print output.
+# GENERATE_FILE_NAME_COMMENT		: generate a file name comment on the 1st line. Format: "// ====== <filename>"
+# GENERATE_AUTO_GENERATE_COMMENT	: generate [Auto generate] comments.			Format: "// ================== [Auto Generate] =================="
+
 
 # ====================================
 #		parameter default value
 # ====================================
 # ROOT_DIR       = Required
 # IS_SILENT_MODE = FALSE
+# GENERATE_FILE_NAME_COMMENT		= TRUE
+# GENERATE_AUTO_GENERATE_COMMENT	= TRUE
 
 # ====================================
 #       return variables
@@ -82,7 +87,7 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#		includes
 	# ====================================
-	include(write_file_if_changed)
+	include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/write_file_if_changed.cmake")
 
 
 	# ====================================
@@ -97,7 +102,11 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#		parameters
 	# ====================================
-	set(options IS_SILENT_MODE)
+	set(options
+		IS_SILENT_MODE
+		GENERATE_FILE_NAME_COMMENT
+		GENERATE_AUTO_GENERATE_COMMENT
+	)
 	set(oneValueArgs ROOT_DIR)
 	set(multiValueArgs)
 
@@ -115,6 +124,14 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	if(NOT DEFINED ARG_IS_SILENT_MODE)
 		set(ARG_IS_SILENT_MODE FALSE)
+	endif()
+
+	if(NOT DEFINED ARG_GENERATE_FILE_NAME_COMMENT)
+		set(ARG_GENERATE_FILE_NAME_COMMENT TRUE)
+	endif()
+
+	if(NOT DEFINED ARG_GENERATE_AUTO_GENERATE_COMMENT)
+		set(ARG_GENERATE_AUTO_GENERATE_COMMENT TRUE)
 	endif()
 
 	if(NOT DEFINED ARG_ROOT_DIR)
@@ -135,7 +152,7 @@ function(generate_recursive_directory_aggregate_headers)
 	# ====================================
 	#       pre-variables
 	# ====================================
-	set(generated_header_list)
+	include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/write_file_if_changed.cmake")
 
 
 	# ====================================
@@ -316,7 +333,35 @@ function(generate_recursive_directory_aggregate_headers)
 		# ====================================
 		#       generate aggregate header
 		# ====================================
-		set(aggregate_header_content "#pragma once\n\n")
+		get_filename_component(
+			aggregate_header_name
+			"${aggregate_header}"
+			NAME
+		)
+
+		set(aggregate_header_content)
+
+		if(ARG_GENERATE_FILE_NAME_COMMENT)
+			string(
+				APPEND
+				aggregate_header_content
+				"// ====== ${aggregate_header_name}\n"
+			)
+		endif()
+
+		if(ARG_GENERATE_AUTO_GENERATE_COMMENT)
+			string(
+				APPEND
+				aggregate_header_content
+				"// ================== [Auto Generate] ==================\n"
+			)
+		endif()
+
+		string(
+			APPEND
+			aggregate_header_content
+			"#pragma once\n\n"
+		)
 
 		foreach(include_line IN LISTS include_lines)
 
