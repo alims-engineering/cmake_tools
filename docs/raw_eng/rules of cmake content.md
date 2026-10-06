@@ -1,5 +1,5 @@
 # Rules of .cmake files content
-## Comment
+## Top
 A .cmake files should record the info below as the comment at top:
 ```
 # ====== ${file_name}.cmake
@@ -26,10 +26,9 @@ A .cmake files should record the info below as the comment at top:
 # return_var_prefix = ${this_function_screaming_snake_case_name}
 # ${return_var_prefix}_VAR1 = value
 # ${return_var_prefix}_VAR2 = value
-
 ```
 
-## Function
+## Inside function
 Structure within a function:
 ```
 function()
