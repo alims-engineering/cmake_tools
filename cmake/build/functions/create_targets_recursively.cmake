@@ -5,30 +5,58 @@
 # Recursively create targets based on the directory hierarchy.
 #
 # Naming of targets:
-#   - ${TARGET_NAME}
-#   - ${TARGET_NAME}_${SUB_FOLDER_NAME}
-#   - ${TARGET_NAME}_${SUB_FOLDER_NAME}_${SUB_SUB_FOLDER_NAME}
+#   - ${TARGET_NAME}_${LOWER_CASE_TARGET_TYPE}
+#   - ${TARGET_NAME}_${SUB_FOLDER_NAME}_${LOWER_CASE_TARGET_TYPE}
+#   - ${TARGET_NAME}_${SUB_FOLDER_NAME}_${SUB_SUB_FOLDER_NAME}_${LOWER_CASE_TARGET_TYPE}
 #   - ...
+#
+# Example:
+#
+# cpp_tools/
+# ??? file/
+# ?   ??? functions/
+# ??? math/
+#     ??? functions/
+#
+# TARGET_NAME = cpp_tools
+# TARGET_TYPE = OBJECT
+#
+# Generates:
+#
+#   cpp_tools_object
+#   cpp_tools_file_object
+#   cpp_tools_file_functions_object
+#   cpp_tools_math_object
+#   cpp_tools_math_functions_object
+
 
 # ====================================
 #       parameters
 # ====================================
 # TARGET_NAME       : Root target name.
+# TARGET_TYPE       : Target type.
+#                     Supported values:
+#                     INTERFACE, STATIC, OBJECT, SHARED.
+#
 # SEARCH_PATHS      : Paths or path patterns to search recursively.
 # FILE_PATTERNS     : File patterns to include.
 # IS_SILENT_MODE    : Disable print output.
 
+
 # ====================================
 #       parameter default value
 # ====================================
+# TARGET_TYPE       = OBJECT
 # SEARCH_PATHS      = ${CMAKE_SOURCE_DIR}
 # FILE_PATTERNS     = *.c, *.cpp
 # IS_SILENT_MODE    = FALSE
+
 
 # ====================================
 #       return variables
 # ====================================
 # RETURN_VAR_PREFIX = CREATE_TARGETS_RECURSIVELY
+#
 # ${RETURN_VAR_PREFIX}_TARGET_NAME_LIST
 
 
@@ -43,9 +71,19 @@ function(create_targets_recursively)
     # ====================================
     #       parameters
     # ====================================
-    set(options IS_SILENT_MODE)
-    set(oneValueArgs TARGET_NAME)
-    set(multiValueArgs SEARCH_PATHS FILE_PATTERNS)
+    set(options
+        IS_SILENT_MODE
+    )
+
+    set(oneValueArgs
+        TARGET_NAME
+        TARGET_TYPE
+    )
+
+    set(multiValueArgs
+        SEARCH_PATHS
+        FILE_PATTERNS
+    )
 
     cmake_parse_arguments(
         ARG
@@ -59,17 +97,96 @@ function(create_targets_recursively)
     # ====================================
     #       parameter default value
     # ====================================
-    if(NOT DEFINED ARG_SEARCH_PATHS)
-        set(ARG_SEARCH_PATHS "${CMAKE_SOURCE_DIR}")
+    if(NOT DEFINED ARG_TARGET_TYPE)
+
+        set(
+            ARG_TARGET_TYPE
+            "OBJECT"
+        )
+
     endif()
+
+
+    if(NOT DEFINED ARG_SEARCH_PATHS)
+
+        set(
+            ARG_SEARCH_PATHS
+            "${CMAKE_SOURCE_DIR}"
+        )
+
+    endif()
+
 
     if(NOT DEFINED ARG_FILE_PATTERNS)
-        set(ARG_FILE_PATTERNS "*.c" "*.cpp")
+
+        set(
+            ARG_FILE_PATTERNS
+            "*.c"
+            "*.cpp"
+        )
+
     endif()
 
+
     if(NOT DEFINED ARG_IS_SILENT_MODE)
-        set(ARG_IS_SILENT_MODE FALSE)
+
+        set(
+            ARG_IS_SILENT_MODE
+            FALSE
+        )
+
     endif()
+
+
+    # ====================================
+    #       validate target name
+    # ====================================
+    if("${ARG_TARGET_NAME}" STREQUAL "")
+
+        message(
+            FATAL_ERROR
+            "[${this_function_name}] TARGET_NAME is required."
+        )
+
+    endif()
+
+
+    # ====================================
+    #       normalize target type
+    # ====================================
+    string(
+        TOUPPER
+        "${ARG_TARGET_TYPE}"
+        ARG_TARGET_TYPE
+    )
+
+
+    # ====================================
+    #       validate target type
+    # ====================================
+    if(
+        NOT ARG_TARGET_TYPE STREQUAL "INTERFACE"
+        AND NOT ARG_TARGET_TYPE STREQUAL "STATIC"
+        AND NOT ARG_TARGET_TYPE STREQUAL "OBJECT"
+        AND NOT ARG_TARGET_TYPE STREQUAL "SHARED"
+    )
+
+        message(
+            FATAL_ERROR
+            "[${this_function_name}] Invalid TARGET_TYPE: ${ARG_TARGET_TYPE}. Supported values: INTERFACE, STATIC, OBJECT, SHARED."
+        )
+
+    endif()
+
+
+    # ====================================
+    #       lower-case target type
+    # ====================================
+    string(
+        TOLOWER
+        "${ARG_TARGET_TYPE}"
+        target_type_suffix
+    )
 
 
     # ====================================
@@ -78,7 +195,10 @@ function(create_targets_recursively)
     if(NOT ARG_IS_SILENT_MODE)
 
         message(STATUS "")
-        message(STATUS "[${this_function_name} - start]")
+        message(
+            STATUS
+            "[${this_function_name} - start]"
+        )
 
     endif()
 
@@ -90,6 +210,7 @@ function(create_targets_recursively)
 
 
     foreach(search_path ${ARG_SEARCH_PATHS})
+
 
         # ------------------------------------
         #       expand search path
@@ -105,15 +226,21 @@ function(create_targets_recursively)
 
         foreach(search_root ${search_roots})
 
+
             if(NOT IS_DIRECTORY "${search_root}")
+
                 continue()
+
             endif()
 
 
             # ------------------------------------
             #       collect directories
             # ------------------------------------
-            set(directories "${search_root}")
+            set(
+                directories
+                "${search_root}"
+            )
 
 
             file(
@@ -145,18 +272,25 @@ function(create_targets_recursively)
             # ------------------------------------
             foreach(directory ${directories})
 
-                # Find source files directly inside
-                # the current directory.
+
+                # ------------------------------------
+                #       collect source files
+                # ------------------------------------
                 set(sources)
+
 
                 foreach(file_pattern ${ARG_FILE_PATTERNS})
 
+
+                    # Find source files directly inside
+                    # the current directory.
                     file(
                         GLOB
                         matched_sources
                         CONFIGURE_DEPENDS
                         "${directory}/${file_pattern}"
                     )
+
 
                     list(
                         APPEND
@@ -168,7 +302,9 @@ function(create_targets_recursively)
 
 
                 if(NOT sources)
+
                     continue()
+
                 endif()
 
 
@@ -177,12 +313,15 @@ function(create_targets_recursively)
                 # ------------------------------------
                 if(directory STREQUAL search_root)
 
+
                     set(
                         current_target_name
-                        "${ARG_TARGET_NAME}"
+                        "${ARG_TARGET_NAME}_${target_type_suffix}"
                     )
 
+
                 else()
+
 
                     file(
                         RELATIVE_PATH
@@ -190,6 +329,7 @@ function(create_targets_recursively)
                         "${search_root}"
                         "${directory}"
                     )
+
 
                     string(
                         REPLACE
@@ -199,9 +339,20 @@ function(create_targets_recursively)
                         "${relative_directory}"
                     )
 
+
+                    # Handle Windows path separator.
+                    string(
+                        REPLACE
+                        "\\"
+                        "_"
+                        relative_target_name
+                        "${relative_target_name}"
+                    )
+
+
                     set(
                         current_target_name
-                        "${ARG_TARGET_NAME}_${relative_target_name}"
+                        "${ARG_TARGET_NAME}_${relative_target_name}_${target_type_suffix}"
                     )
 
                 endif()
@@ -214,7 +365,7 @@ function(create_targets_recursively)
 
                     message(
                         FATAL_ERROR
-                        "Target '${current_target_name}' already exists."
+                        "[${this_function_name}] Target '${current_target_name}' already exists."
                     )
 
                 endif()
@@ -225,11 +376,30 @@ function(create_targets_recursively)
                 # ------------------------------------
                 add_library(
                     "${current_target_name}"
-                    OBJECT
+                    ${ARG_TARGET_TYPE}
                     ${sources}
                 )
 
 
+                # ------------------------------------
+                #       set linker language
+                # ------------------------------------
+                if(NOT ARG_TARGET_TYPE STREQUAL "INTERFACE")
+
+                    set_property(
+                        TARGET
+                        "${current_target_name}"
+                        PROPERTY
+                        LINKER_LANGUAGE
+                        CXX
+                    )
+
+                endif()
+
+
+                # ------------------------------------
+                #       append target name
+                # ------------------------------------
                 list(
                     APPEND
                     target_name_list
@@ -249,9 +419,12 @@ function(create_targets_recursively)
 
                 endif()
 
+
             endforeach()
 
+
         endforeach()
+
 
     endforeach()
 
@@ -275,13 +448,17 @@ function(create_targets_recursively)
         )
 
 
-        foreach(temp_print_return_var IN ITEMS
+        foreach(
+            temp_print_return_var
+            IN ITEMS
             "${this_function_name}_TARGET_NAME_LIST"
         )
+
             message(
                 STATUS
                 "${temp_print_return_var} = ${${temp_print_return_var}}"
             )
+
         endforeach()
 
     endif()
